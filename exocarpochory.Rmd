@@ -1,0 +1,298 @@
+---
+title: "Exocarpochory"
+author: "David S, Mason"
+date: "6/14/2021"
+output:
+  pdf_document: default
+  html_document: default
+---
+## Generating one set of dispersal observations from two different dispersal kernels
+
+This simulation explores the impact of exocarpochory on dispersal distance. We use probability distributions that reflect wind dispersal and epizoochory to draw random observatons. These draws are repeated 10000 times with differing probability of exocarpochory occuring. Then, we calculate the difference between observations with and without exocarpochory. Next,we depict the positive relationship between increase in disperal distance and probability for exocarpochory. Finally, we generate histograms of these observations for direct
+comparison of the simulations.
+
+## Bring in the packages
+```{r}
+library(LaplacesDemon)
+library(tidyverse)
+options(scipen = 999) # No scientific notation
+```
+## Basic (non-mixed) kernels
+```{r}
+# Conyza
+set.seed(14356)
+
+wind <- as.data.frame(rcauchy(n=10000,
+															location=0.00000249,scale=2.7658))
+colnames(wind) <- c("Distance")
+
+wind <- wind %>% filter(Distance>=0)
+
+wind$Kernel <- "Wind only"
+LDD.wind <- filter(wind, Distance>=100)
+length(LDD.wind)
+# Trillium 	
+animal <- as.data.frame(rpe(n=10000,sigma=188.36,kappa=0.7341))
+colnames(animal) <- c("Distance")
+
+animal <- animal %>% filter(Distance>0)
+```
+## Set parameters for simulation
+```{r}
+# Create vectors of the probability of exocarpochory
+p.wind <- c(0.99, 0.95, 0.90, 0.80, 0.70)
+p.animal <- 1-p.wind
+
+# Set the number of draws
+n <- 10000
+```
+
+## Simulation with 1% Exocarpochory
+```{r}
+mix.sims.out <- rep(0,n) # Create output vector
+set.seed(4) # We set a new seed everytime because.....
+
+for(i in 1:n){ # For loop runs n draws
+  
+  U <- runif(n=1) # Select random number between 0-1
+  if(U <= p.wind[1]){ # If the probability of wind is less than that number
+    # Pick Conyza (wind) kernel:
+    mix.sims.out[i] <- rcauchy(n=1,
+															location=0.00000249,scale=2.7658)
+  }else{ # Otherwise
+    # Pick Desmodium (epizoo) animal kernel: 
+    mix.sims.out[i] <- rpe(n=1,sigma=188.36,kappa=0.7341)
+  }
+}
+
+mix.sims.out.1 <- as.data.frame(mix.sims.out) # Save as unique dataframe
+colnames(mix.sims.out.1) <- c("Distance") # Change column name
+mix.sims.out.1$Kernel <- "1% Exocarpochory" # Create column to ID kernel
+mix.sims.out.1 <- mix.sims.out.1 %>% filter(Distance>=0) # Truncate the data
+
+# Calculate comparison metrics
+median(mix.sims.out.1$Distance)-median(wind$Distance) # Difference in median = 0.05361729
+quantile(mix.sims.out.1$Distance, probs=c(.95))-
+	quantile(wind$Distance, probs=c(.95)) # Difference in 95% quantile = 12.13406 
+LDD.1 <- filter(mix.sims.out.1, Distance>=100) # How many observations > 100 m
+length(LDD.1)
+```
+
+
+## Simulation with 5% Exocarpochory
+```{r}
+mix.sims.out <- rep(0,n) # Make a new vector to write over each simulation
+set.seed(302)
+
+for(i in 1:n){
+  
+  U <- runif(n=1)
+  if(U <= p.wind[2]){ # The indexing here is how the probability changes
+  	# Pick Conyza (wind) kernel:
+    mix.sims.out[i] <- rcauchy(n=1,
+															location=0.00000249,scale=2.7658)
+  }else{
+    # Pick Desmodium (epizoo) animal kernel: 
+    mix.sims.out[i] <- rpe(n=1,sigma=188.36,kappa=0.7341)
+  }
+}
+
+mix.sims.out.5 <- as.data.frame(mix.sims.out)
+colnames(mix.sims.out.5) <- c("Distance")
+mix.sims.out.5$Kernel <- "5% Exocarpochory"
+mix.sims.out.5 <- mix.sims.out.5 %>% filter(Distance>=0)
+
+median(mix.sims.out.5$Distance)-median(wind$Distance) # 0.287181
+quantile(mix.sims.out.5$Distance, probs=c(.95))-
+	quantile(wind$Distance, probs=c(.95)) # 52.16673  
+LDD.5 <- filter(mix.sims.out.5, Distance>=100)
+length(LDD.5)
+```
+
+## Simulation with 10% Exocarpochory
+```{r}
+mix.sims.out <- rep(0,n)
+set.seed(49)
+for(i in 1:n){
+  
+  U <- runif(n=1)
+  if(U <= p.wind[3]){
+    # Pick wind kernel:
+    mix.sims.out[i] <- rcauchy(n=1,
+															location=0.00000249,scale=2.7658)
+  }else{
+    # Pick animal kernel: 
+    mix.sims.out[i] <- rpe(n=1,sigma=188.36,kappa=0.7341)
+  }
+}
+
+mix.sims.out.10 <- as.data.frame(mix.sims.out)
+colnames(mix.sims.out.10) <- c("Distance")
+mix.sims.out.10$Kernel <- "10% Exocarpochory"
+mix.sims.out.10 <- mix.sims.out.10 %>% filter(Distance>=0)
+
+median(mix.sims.out.10$Distance)-median(wind$Distance) #  0.5404275
+quantile(mix.sims.out.10$Distance, probs=c(.95))-
+	quantile(wind$Distance, probs=c(0.95)) # 150.6252   
+LDD.10 <- filter(mix.sims.out.10, Distance>=100)
+length(LDD.10)
+```
+## Simulation with 20% Exocarpochory
+```{r}
+mix.sims.out <- rep(0,n)
+set.seed(501)
+for(i in 1:n){
+  
+  U <- runif(n=1)
+  if(U <= p.wind[4]){
+    #pick wind kernel:
+    mix.sims.out[i] <- rcauchy(n=1,
+															location=0.00000249,scale=2.7658)
+  }else{
+    #pick animal kernel: 
+    mix.sims.out[i] <- rpe(n=1,sigma=188.36,kappa=0.7341)
+  }
+}
+
+mix.sims.out.20 <- as.data.frame(mix.sims.out)
+colnames(mix.sims.out.20) <- c("Distance")
+mix.sims.out.20$Kernel <- "20% Exocarpochory"
+mix.sims.out.20 <- mix.sims.out.20 %>% filter(Distance>=0)
+
+median(mix.sims.out.20$Distance)-median(wind$Distance) # 1.337396
+quantile(mix.sims.out.20$Distance, probs=c(.95))-
+	quantile(wind$Distance, probs=c(.95)) # 272.4912 
+LDD.20 <- filter(mix.sims.out.20, Distance>=100)
+length(LDD.20)
+```
+## Simulation with 30% Exocarpochory
+```{r}
+mix.sims.out <- rep(0,n)
+set.seed(000109)
+for(i in 1:n){
+  
+  U <- runif(n=1)
+  if(U <= p.wind[5]){
+    # Pick wind kernel:
+    mix.sims.out[i] <- rcauchy(n=1,
+															location=0.00000249,scale=2.7658)
+  }else{
+    # Pick animal kernel: 
+    mix.sims.out[i] <- rpe(n=1,sigma=188.36,kappa=0.7341)
+  }
+}
+
+mix.sims.out.30 <- as.data.frame(mix.sims.out)
+colnames(mix.sims.out.30) <- c("Distance")
+mix.sims.out.30$Kernel <- "30% Exocarpochory"
+mix.sims.out.30 <- mix.sims.out.30 %>% filter(Distance>=0)
+
+median(mix.sims.out.30$Distance)-median(wind$Distance) # 2.5146
+quantile(mix.sims.out.30$Distance, probs=c(.95))-
+	quantile(wind$Distance, probs=c(.95)) # 405.3121 
+LDD.30 <- filter(mix.sims.out.30, Distance>=100)
+length(LDD.30)
+```
+## Collate comparison metrics 
+```{r}
+# Create a data frame with the change in median and 95% quantile
+df <- data.frame(Probability = c(1,5,10,20,30),
+								 Delta_median = c(0.05361729,0.287181,0.5404275, 1.337396,2.5146),
+								 Delta_95 = c(12.13406,52.16673,150.6252, 272.4912,405.3121))
+
+# Set probability as a factor
+df$Probability <- as.factor(df$Probability) 
+
+# Convert the data to long format
+df_long <- pivot_longer(df, cols = c("Delta_median",
+																		 "Delta_95"), names_to = "Parameter")
+
+# Load plyr to revalue parameters
+library(plyr)
+df_long$Parameter <- plyr::revalue(df_long$Parameter, c("Delta_median"="50th percentile", 
+												 "Delta_95"="95th percentile"))
+
+# Assign different limits for each parameter to manipulate figure axis
+limits <- data.frame(Parameter = c("50th percentile", "95th percentile"),
+																	 y_min = c(0,0), y_max = c(3,450))
+
+# Add them to the original dataframe
+fifty <- filter(df_long, Parameter=='50th percentile')
+fifty$y_min <- 0
+fifty$y_max <- 3
+ninety <- filter(df_long, Parameter=='95th percentile')
+ninety$y_min <- 0
+ninety$y_max <- 450
+
+df_long <- rbind(fifty,ninety)
+```
+
+## Plot comparison metrics 
+```{r}
+p1<-ggplot(df_long, aes(x = Probability, y = value))+
+			 		geom_point(size=10)+
+					ylab("Increase in dispersal distance (m)")+
+					theme_classic()+
+					xlab("Probability of Exocarpochory (%)")+
+					theme(text = element_text(size = 25))+
+					theme(axis.title.y = element_text(vjust = 2))+
+					scale_x_discrete(breaks=c("1","5","10", "20", "30"))+
+					facet_wrap(~Parameter, scales = "free_y", nrow = 2)+
+					geom_blank(aes(y = y_min))+ # Alter axis limits for facet 
+				  geom_blank(aes(y = y_max))  # wrapped parameters
+```
+## Plot observations from simulations
+
+RE: Warning messages. Extreme values (i.e., beyond the axis represented in the figure) are dropped. which I believe is triggering the warning messages. Unfortunately, we are forced to strike a balance between practical/effective visualization and thoroughness/honest representation. If we leave in extreme values, the x-axis will be long enough to accomodate values > 20000 m, which inhibits interpretation
+of the rest of the data. 
+
+*This will not add the long-distance dispersal information seen on the histograms in the final version. This information was addded on top of the combined figure using Preview.*
+```{r}
+
+# Combine simulations into vector, drop 
+comb.kernel.no.wind <- rbind(mix.sims.out.1,mix.sims.out.10,mix.sims.out.30)
+
+# Make a vector of wind simulation for histogram background
+wind.fig <- as.data.frame(wind[,1])
+colnames(wind.fig) <- c("Distance")
+
+# Get values to backtransform labels on x-axis
+log(11) # 2.397895
+log(21) # 3.044522
+log(751) # 6.621406
+
+
+library(RColorBrewer)
+brewer.pal(3, "Blues") 
+
+p2<-ggplot(comb.kernel.no.wind, aes(x=log(1+Distance),fill=Kernel))+
+	geom_histogram(wind.fig, mapping = aes(x=log(1+Distance)), fill='lightgray',
+								 bins = 80, alpha = 0.8, color = 'black')+
+	geom_histogram(position="identity",
+  							 bins = 80, color = "black", alpha = 0.7)+
+	geom_vline(xintercept=4.615121, linetype='solid', color='black', size=1)+
+	scale_fill_manual(values = c('#DEEBF7','#9ECAE1','#3182BD'))+
+	scale_x_continuous(expand = c(0,0),
+										 breaks = c(0,2.397895,
+																3.044522,6.621406),
+										 labels = c("0","10","100",
+										 					 "750"),
+										 limits = c(0, 7.5))+
+	scale_y_continuous(expand = c(0,0),limits = c(0,250))+
+	facet_wrap(~Kernel,ncol = 1)+
+	xlab("Distance (m)")+
+	ylab("Frequency")+
+	theme_classic()+
+	theme(strip.background = element_blank(),strip.text.x = element_blank(),
+        panel.background = element_rect(colour = "black", size=1.5),
+				text = element_text(size=25),panel.spacing = unit(1.5, "lines"),
+				legend.position="top", legend.title = element_blank())
+```
+## Combine plots
+```{r}
+library(ggpubr)
+combo <- ggarrange(p2, p1,labels = c("a", "b"),
+					common.legend = TRUE, legend='top')
+
+ggsave('combo.jpg', width = 14, height = 8, dpi = 300)
+```
