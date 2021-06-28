@@ -1,7 +1,7 @@
 ---
 title: "Exocarpochory"
 author: "David S, Mason"
-date: "6/14/2021"
+date: "6/28/2021"
 output:
   pdf_document: default
   html_document: default
@@ -296,3 +296,12 @@ combo <- ggarrange(p2, p1,labels = c("a", "b"),
 
 ggsave('combo.jpg', width = 14, height = 8, dpi = 300)
 ```
+## Packages and software
+
+Alboukadel Kassambara (2020). ggpubr:'ggplot2' Based Publication Ready Plots.R package version 0.4.0. https://CRAN.R-project.org/package=ggpubr
+
+RStudio Team (2018).RStudio: Integrated Development for R. RStudio, Inc., Boston, MA. URL:http://www.rstudio.com/.
+
+Statisticat, LLC.(2020). LaplacesDemon: Complete Environment for Bayesian Inference. Bayesian-Inference.com.R package version 16.1.4.[https://web.archive.org/web/20150206004624/http://www.bayesian-inference.com/software]
+
+Wickham et al., (2019). Welcome to the tidyverse. Journal of Open Source Software, 4(43), 1686, https://doi.org/10.21105/joss.01686
